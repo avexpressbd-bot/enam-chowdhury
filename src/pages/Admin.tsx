@@ -62,8 +62,11 @@ export default function Admin() {
             onClick={async () => {
               try {
                 await login();
-              } catch (e) {
-                alert("লগইন করতে সমস্যা হয়েছে। দয়া করে আপনার ফায়ারবেস কনফিগারেশন চেক করুন।");
+              } catch (e: any) {
+                console.error("Login error:", e);
+                const errorCode = e.code || "unknown";
+                const errorMessage = e.message || "সমস্যা হয়েছে";
+                alert(`লগইন করতে সমস্যা হয়েছে।\nError Code: ${errorCode}\nError: ${errorMessage}\n\nপরামর্শ: Firebase-এ Google Auth ইনাবল আছে কি না এবং Authorized Domains-এ আপনার সাইট অ্যাড করা আছে কি না চেক করুন।`);
               }
             }}
             className="w-full flex items-center justify-center gap-2 bg-red-600 text-white py-4 rounded-xl font-bold hover:bg-red-700 transition-all shadow-lg shadow-red-100"
