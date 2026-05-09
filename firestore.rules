@@ -1,0 +1,57 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        request.auth.token.email == "jummanbepari5@gmail.com"
+      );
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Settings validation
+    function isValidSettings(data) {
+      return data is map; // Add more specific checks if needed
+    }
+
+    // Contact submission validation
+    function isValidContact(data) {
+      return data.keys().hasAll(['name', 'email', 'subject', 'message', 'createdAt'])
+        && data.keys().size() == 5
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 100
+        && data.email is string && data.email.size() > 0 && data.email.size() <= 100
+        && data.subject is string && data.subject.size() <= 200
+        && data.message is string && data.message.size() > 0 && data.message.size() <= 2000
+        && data.createdAt == request.time;
+    }
+
+    match /contacts/{contactId} {
+      allow create: if isValidId(contactId) && isValidContact(request.resource.data);
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /admins/{adminId} {
+      allow read: if isSignedIn();
+      allow write: if false; // Only manageable through console or initial setup
+    }
+  }
+}

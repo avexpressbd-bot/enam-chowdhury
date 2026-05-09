@@ -1,0 +1,55 @@
+{
+  "entities": {
+    "Contact": {
+      "title": "Contact Submission",
+      "description": "Information provided by users via the contact form",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "subject": { "type": "string" },
+        "message": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "email", "message", "createdAt"]
+    },
+    "Settings": {
+      "title": "Site Settings",
+      "description": "Dynamic content for the website",
+      "type": "object",
+      "properties": {
+        "siteName": { "type": "string" },
+        "slogan": { "type": "string" },
+        "bannerImage": { "type": "string" },
+        "aboutText": { "type": "string" },
+        "aboutImage": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string" },
+        "address": { "type": "string" },
+        "facebookUrl": { "type": "string" }
+      }
+    },
+    "Admin": {
+      "title": "Administrator",
+      "description": "Users with administrative privileges",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string" }
+      }
+    }
+  },
+  "firestore": {
+    "contacts": {
+      "schema": "Contact",
+      "description": "Submissions from the Contact Us page"
+    },
+    "settings": {
+      "schema": "Settings",
+      "description": "Global site configuration"
+    },
+    "admins": {
+      "schema": "Admin",
+      "description": "List of admin UIDs"
+    }
+  }
+}
