@@ -16,9 +16,11 @@ export default function Admin() {
   const [messages, setMessages] = useState<any[]>([]);
 
   // Initialize form data when settings are loaded
-  if (!formData && settings) {
-    setFormData(settings);
-  }
+  useEffect(() => {
+    if (settings && !formData) {
+      setFormData(settings);
+    }
+  }, [settings, formData]);
 
   // Fetch messages
   useEffect(() => {
@@ -46,13 +48,36 @@ export default function Admin() {
           <SettingsIcon size={40} />
         </div>
         <h1 className="text-2xl font-bold mb-4">অ্যাডমিন প্যানেল</h1>
-        <p className="text-slate-600 mb-8">এই পৃষ্ঠাটি শুধুমাত্র অ্যাডমিনদের জন্য। অনুগ্রহ করে লগইন করুন।</p>
-        <button 
-          onClick={login}
-          className="w-full flex items-center justify-center gap-2 bg-red-600 text-white py-4 rounded-xl font-bold hover:bg-red-700 transition-all shadow-lg shadow-red-100"
-        >
-          <LogIn size={20} /> গুগল দিয়ে লগইন করুন
-        </button>
+        {user ? (
+          <div className="mb-8">
+            <p className="text-slate-600 mb-2">আপনি লগইন করেছেন: <span className="font-bold text-slate-900">{user.email}</span></p>
+            <p className="text-red-500 text-sm font-medium">কিন্তু আপনার এই ইমেইলটি অ্যাডমিন হিসেবে তালিকাভুক্ত নয়।</p>
+          </div>
+        ) : (
+          <p className="text-slate-600 mb-8">এই পৃষ্ঠাটি শুধুমাত্র অ্যাডমিনদের জন্য। অনুগ্রহ করে লগইন করুন।</p>
+        )}
+        
+        {!user ? (
+          <button 
+            onClick={async () => {
+              try {
+                await login();
+              } catch (e) {
+                alert("লগইন করতে সমস্যা হয়েছে। দয়া করে আপনার ফায়ারবেস কনফিগারেশন চেক করুন।");
+              }
+            }}
+            className="w-full flex items-center justify-center gap-2 bg-red-600 text-white py-4 rounded-xl font-bold hover:bg-red-700 transition-all shadow-lg shadow-red-100"
+          >
+            <LogIn size={20} /> গুগল দিয়ে লগইন করুন
+          </button>
+        ) : (
+          <button 
+            onClick={logout}
+            className="w-full flex items-center justify-center gap-2 bg-slate-200 text-slate-700 py-4 rounded-xl font-bold hover:bg-slate-300 transition-all"
+          >
+            <LogOut size={20} /> অন্য একাউন্ট দিয়ে চেষ্টা করুন
+          </button>
+        )}
       </div>
     );
   }
@@ -134,7 +159,7 @@ export default function Admin() {
                   <input 
                     type="text" 
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-red-600 outline-none"
-                    value={formData?.siteName}
+                    value={formData?.siteName || ""}
                     onChange={(e) => updateField('siteName', e.target.value)}
                   />
                 </div>
@@ -143,7 +168,7 @@ export default function Admin() {
                   <textarea 
                     rows={2}
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-red-600 outline-none"
-                    value={formData?.slogan}
+                    value={formData?.slogan || ""}
                     onChange={(e) => updateField('slogan', e.target.value)}
                   />
                 </div>
@@ -161,7 +186,7 @@ export default function Admin() {
                   <input 
                     type="text" 
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-red-600 outline-none"
-                    value={formData?.bannerImage}
+                    value={formData?.bannerImage || ""}
                     onChange={(e) => updateField('bannerImage', e.target.value)}
                   />
                 </div>
@@ -170,7 +195,7 @@ export default function Admin() {
                   <input 
                     type="text" 
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-red-600 outline-none"
-                    value={formData?.aboutImage}
+                    value={formData?.aboutImage || ""}
                     onChange={(e) => updateField('aboutImage', e.target.value)}
                   />
                 </div>
@@ -185,7 +210,7 @@ export default function Admin() {
                 <textarea 
                   rows={6}
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-red-600 outline-none"
-                  value={formData?.aboutText}
+                  value={formData?.aboutText || ""}
                   onChange={(e) => updateField('aboutText', e.target.value)}
                 />
               </div>
@@ -201,7 +226,7 @@ export default function Admin() {
                    <input 
                       type="text" 
                       className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none"
-                      value={formData?.phone}
+                      value={formData?.phone || ""}
                       onChange={(e) => updateField('phone', e.target.value)}
                     />
                  </div>
@@ -210,7 +235,7 @@ export default function Admin() {
                    <input 
                       type="text" 
                       className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none"
-                      value={formData?.email}
+                      value={formData?.email || ""}
                       onChange={(e) => updateField('email', e.target.value)}
                     />
                  </div>
@@ -219,7 +244,7 @@ export default function Admin() {
                    <input 
                       type="text" 
                       className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none"
-                      value={formData?.address}
+                      value={formData?.address || ""}
                       onChange={(e) => updateField('address', e.target.value)}
                     />
                  </div>
