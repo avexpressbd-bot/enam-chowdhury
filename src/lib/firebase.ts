@@ -2,28 +2,38 @@ import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
-// Safely attempt to import the local config file (present in AI Studio, usually missing on Vercel/GitHub)
-// Using import.meta.glob with eager: true allows us to handle the missing file without build errors.
-const localConfigFiles = import.meta.glob('../../firebase-applet-config.json', { eager: true, import: 'default' });
-const localConfig = (Object.values(localConfigFiles)[0] as any) || {};
+// Simplified config loading for AI Studio environment
+// @ts-ignore
+import localConfig from '../../firebase-applet-config.json';
 
-// Prioritize environment variables (Vercel) but fallback to local config (AI Studio)
-const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || localConfig.apiKey,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || localConfig.authDomain,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || localConfig.projectId,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || localConfig.storageBucket,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || localConfig.messagingSenderId,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || localConfig.appId,
-  firestoreDatabaseId: import.meta.env.VITE_FIREBASE_DATABASE_ID || localConfig.firestoreDatabaseId || "(default)"
+// Standard Firebase initialization
+const firebaseConfig: any = {
+  apiKey: (import.meta as any).env?.VITE_FIREBASE_API_KEY || localConfig?.apiKey,
+  authDomain: (import.meta as any).env?.VITE_FIREBASE_AUTH_DOMAIN || localConfig?.authDomain,
+  projectId: (import.meta as any).env?.VITE_FIREBASE_PROJECT_ID || localConfig?.projectId,
+  storageBucket: (import.meta as any).env?.VITE_FIREBASE_STORAGE_BUCKET || localConfig?.storageBucket,
+  messagingSenderId: (import.meta as any).env?.VITE_FIREBASE_MESSAGING_SENDER_ID || localConfig?.messagingSenderId,
+  appId: (import.meta as any).env?.VITE_FIREBASE_APP_ID || localConfig?.appId,
+  firestoreDatabaseId: (import.meta as any).env?.VITE_FIREBASE_DATABASE_ID || localConfig?.firestoreDatabaseId || "(default)"
 };
 
-// Graceful initialization check
+// For now, let's just make sure we don't crash if things are missing
 export const isFirebaseConfigured = !!(firebaseConfig.apiKey && firebaseConfig.projectId);
+
+console.log("Firebase Provider Status:", { 
+  isConfigured: isFirebaseConfigured, 
+  projectId: firebaseConfig.projectId,
+  authDomain: firebaseConfig.authDomain
+});
+
+if (!isFirebaseConfigured) {
+  console.warn("Firebase is NOT configured properly. Check your environment variables or local config.");
+}
 
 const app = isFirebaseConfigured ? initializeApp(firebaseConfig) : null;
 export const db = app ? getFirestore(app, firebaseConfig.firestoreDatabaseId) : ({} as any);
 export const auth = app ? getAuth(app) : ({} as any);
+export const firebaseApp = app;
 
 export enum OperationType {
   CREATE = 'create',
