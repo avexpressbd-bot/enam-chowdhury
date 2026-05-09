@@ -1,8 +1,8 @@
 import Banner from "../components/ui/Banner";
 import { motion } from "motion/react";
 import { Phone, Mail, MapPin, Send } from "lucide-react";
-import { useState, FormEvent, useEffect } from "react";
-import { collection, addDoc, serverTimestamp, doc, getDocFromServer } from 'firebase/firestore';
+import { useState, FormEvent } from "react";
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { useSettings } from "../lib/settings";
 
@@ -15,19 +15,6 @@ export default function Contact() {
     message: ""
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    async function testConnection() {
-      try {
-        await getDocFromServer(doc(db, 'test', 'connection'));
-      } catch (error) {
-        if(error instanceof Error && error.message.includes('the client is offline')) {
-          console.error("Please check your Firebase configuration.");
-        }
-      }
-    }
-    testConnection();
-  }, []);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();

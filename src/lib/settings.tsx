@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { doc, onSnapshot, setDoc, getDoc } from "firebase/firestore";
 import { db, handleFirestoreError, OperationType } from "./firebase";
 
@@ -62,13 +62,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const docRef = doc(db, "settings", "global");
     
-    // Check if document exists, if not create it with defaults
-    getDoc(docRef).then((snap) => {
-      if (!snap.exists()) {
-        setDoc(docRef, defaultSettings);
-      }
-    });
-
+    // The settings will use defaultSettings as initial state if the document doesn't exist
     const unsubscribe = onSnapshot(docRef, (doc) => {
       if (doc.exists()) {
         setSettings(doc.data() as SiteSettings);
