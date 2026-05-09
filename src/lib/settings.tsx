@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { doc, onSnapshot, setDoc, getDoc } from "firebase/firestore";
-import { db, handleFirestoreError, OperationType } from "./firebase";
+import { db, handleFirestoreError, OperationType, isFirebaseConfigured } from "./firebase";
 
 export interface SiteSettings {
   siteName: string;
@@ -60,6 +60,10 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!isFirebaseConfigured) {
+      setLoading(false);
+      return;
+    }
     const docRef = doc(db, "settings", "global");
     
     // The settings will use defaultSettings as initial state if the document doesn't exist
@@ -69,7 +73,9 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       }
       setLoading(false);
     }, (error) => {
-      handleFirestoreError(error, OperationType.GET, "settings/global");
+      console.error("Settings load failed:", error);
+      // Don't throw here to avoid crashing the whole App before we can show something
+      // handleFirestoreError(error, OperationType.GET, "settings/global");
       setLoading(false);
     });
 

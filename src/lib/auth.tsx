@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { onAuthStateChanged, User, signInWithPopup, GoogleAuthProvider, signOut } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
-import { auth, db } from "./firebase";
+import { auth, db, isFirebaseConfigured } from "./firebase";
 
 interface AuthContextType {
   user: User | null;
@@ -19,13 +19,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!isFirebaseConfigured) {
+      setLoading(false);
+      return;
+    }
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
       if (user) {
         // Simple admin check: either email matches or document exists in admins collection
-        const adminDoc = await getDoc(doc(db, "admins", user.uid));
-        const isUserAdmin = adminDoc.exists() || user.email === "jummanbepari5@gmail.com";
-        setIsAdmin(isUserAdmin);
+        try {
+          const adminDoc = await getDoc(doc(db, "admins", user.uid));
+          const isUserAdmin = adminDoc.exists() || user.email === "jummanbepari5@gmail.com";
+          setIsAdmin(isUserAdmin);
+        } catch (error) {
+          console.error("Admin check failed:", error);
+          setIsAdmin(user.email === "jummanbepari5@gmail.com");
+        }
       } else {
         setIsAdmin(false);
       }

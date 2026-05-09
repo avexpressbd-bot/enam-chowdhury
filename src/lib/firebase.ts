@@ -18,9 +18,12 @@ const firebaseConfig = {
   firestoreDatabaseId: import.meta.env.VITE_FIREBASE_DATABASE_ID || localConfig.firestoreDatabaseId || "(default)"
 };
 
-const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
-export const auth = getAuth(app);
+// Graceful initialization check
+export const isFirebaseConfigured = !!(firebaseConfig.apiKey && firebaseConfig.projectId);
+
+const app = isFirebaseConfigured ? initializeApp(firebaseConfig) : null;
+export const db = app ? getFirestore(app, firebaseConfig.firestoreDatabaseId) : ({} as any);
+export const auth = app ? getAuth(app) : ({} as any);
 
 export enum OperationType {
   CREATE = 'create',
