@@ -102,7 +102,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
     }, (error) => {
       clearTimeout(timer);
-      console.error("Settings lead error:", error);
+      console.error("Settings load error:", error);
       setLoading(false);
     });
 

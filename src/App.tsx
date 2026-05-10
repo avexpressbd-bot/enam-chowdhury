@@ -57,26 +57,39 @@ function AppContent() {
               <p className="text-slate-500 text-sm">আপনার নির্বাচনী পোর্টাল প্রস্তুত হচ্ছে।</p>
             </div>
             
-            <div className="p-3 bg-white border border-slate-200 rounded-xl shadow-sm">
-              <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-1">কানেকশন ইনফো</p>
-              <p className="text-xs font-bold text-slate-600 truncate">
-                {!isFirebaseConfigured ? "Firebase Not Set" : `Project: enam-chowdhury`}
-              </p>
+            <div className="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm text-center">
+              <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-2">স্ট্যাটাস চেক</p>
+              <div className="flex justify-center gap-4 text-xs font-bold font-mono">
+                <span className={authLoading ? "text-amber-500 animate-pulse" : "text-emerald-600"}>
+                  {authLoading ? "AUTH..." : "AUTH OK"}
+                </span>
+                <span className={settingsLoading ? "text-amber-500 animate-pulse" : "text-emerald-600"}>
+                  {settingsLoading ? "DATA..." : "DATA OK"}
+                </span>
+              </div>
             </div>
           </div>
           
           {showTimeout && (
-            <div className="mt-4 p-5 bg-amber-50 border border-amber-200 rounded-2xl text-amber-900 text-sm text-left shadow-lg shadow-amber-900/5">
-              <div className="flex gap-2 items-start mb-3">
-                <AlertCircle className="shrink-0 text-amber-600" size={18} />
-                <p className="font-bold">বেশি সময় লাগছে!</p>
+            <div className="mt-4 p-6 bg-slate-900 border border-slate-800 rounded-2xl text-slate-300 text-sm text-left shadow-2xl">
+              <div className="flex gap-2 items-start mb-4">
+                <AlertCircle className="shrink-0 text-red-500" size={20} />
+                <p className="font-bold text-white text-base">বেশি সময় লাগছে!</p>
               </div>
-              <p className="mb-4 text-xs leading-relaxed opacity-80">যদি সাইটটি লোড না হয়, তাহলে নিশ্চিত করুন যে আপনি Firebase-এ **Cloud Firestore Rules** ঠিকভাবে সেটআপ করেছেন (Realtime Database নয়)।</p>
+              
+              <div className="space-y-4 opacity-90">
+                <p className="text-xs leading-relaxed">১. নিশ্চিত করুন আপনি <b>Cloud Firestore</b> (Realtime Database নয়) ব্যবহার করছেন।</p>
+                <div className="bg-slate-800 p-3 rounded-xl border border-slate-700 font-mono text-[10px] text-emerald-400">
+                  allow read, write: if true;
+                </div>
+                <p className="text-xs leading-relaxed">২. এটি <b>Publish</b> করা হয়েছে কিনা চেক করুন।</p>
+              </div>
+
               <button 
                 onClick={() => window.location.reload()}
-                className="w-full bg-amber-600 text-white px-4 py-3 rounded-xl font-bold text-xs hover:bg-amber-700 transition-all flex items-center justify-center gap-2"
+                className="w-full mt-6 bg-red-600 text-white px-4 py-3 rounded-xl font-bold text-xs hover:bg-red-700 transition-all flex items-center justify-center gap-2"
               >
-                আবার চেষ্টা করুন
+                আবার লোড করুন
               </button>
             </div>
           )}
