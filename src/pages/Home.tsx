@@ -42,9 +42,19 @@ export default function Home() {
                     alt={item.title} 
                     className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
                   />
-                  <div className="absolute inset-0 bg-red-900/0 group-hover:bg-red-900/40 transition-colors flex items-center justify-center">
-                    <PlayCircle size={48} className="text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </div>
+                  {item.videoUrl && (
+                    <div className="absolute inset-0 bg-slate-900/40 group-hover:bg-slate-900/20 transition-all flex items-center justify-center">
+                      <a 
+                        href={item.videoUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-16 h-16 bg-red-600 text-white rounded-full flex items-center justify-center shadow-xl transform group-hover:scale-110 transition-all"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <PlayCircle size={32} fill="currentColor" />
+                      </a>
+                    </div>
+                  )}
                 </div>
                 <div className="px-2 pb-2">
                   <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-emerald-700 transition-colors">
@@ -59,6 +69,51 @@ export default function Home() {
           </div>
         </div>
       </section>
+      {/* Video Gallery Section */}
+      <section id="video-gallery" className="py-24 bg-slate-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <span className="inline-block px-3 py-1 bg-red-50 text-red-600 text-[10px] font-bold uppercase tracking-widest mb-4 rounded-full border border-red-100">ভিডিও আর্কাইভ</span>
+            <h2 className="text-3xl md:text-5xl font-extrabold text-slate-900 tracking-tight">নির্বাচনী <span className="text-red-600">ভিডিও</span> গ্যালারি</h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {(settings.videos || []).map((video, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                className="group relative overflow-hidden rounded-3xl bg-white shadow-xl border border-slate-100"
+              >
+                <div className="aspect-video relative overflow-hidden">
+                  <img 
+                    src={video.thumbnail} 
+                    alt={video.title} 
+                    className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+                  />
+                  <div className="absolute inset-0 bg-slate-900/40 group-hover:bg-slate-900/20 transition-all flex items-center justify-center">
+                    <a 
+                      href={video.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="w-16 h-16 bg-red-600 text-white rounded-full flex items-center justify-center shadow-2xl transform group-hover:scale-110 transition-all"
+                    >
+                      <PlayCircle size={32} fill="currentColor" />
+                    </a>
+                  </div>
+                </div>
+                <div className="p-6">
+                  <h3 className="font-bold text-lg text-slate-900 leading-tight group-hover:text-red-600 transition-colors">
+                    {video.title}
+                  </h3>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Quick Links / Highlights */}
       <section id="highlights" className="bg-slate-900 py-20 text-white text-center relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">

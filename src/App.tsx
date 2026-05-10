@@ -13,6 +13,7 @@ import Manifesto from "./pages/Manifesto";
 import Gallery from "./pages/Gallery";
 import Contact from "./pages/Contact";
 import Admin from "./pages/Admin";
+import BreakingNews from "./components/BreakingNews";
 import { AuthProvider, useAuth } from "./lib/auth";
 import { SettingsProvider, useSettings } from "./lib/settings";
 import { isFirebaseConfigured } from "./lib/firebase";
@@ -93,7 +94,10 @@ function AppContent() {
           Firebase not configured. Deployment on Vercel/GitHub requires environment variables.
         </div>
       )}
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col pt-10">
+        <div className="fixed top-0 left-0 right-0 z-[60]">
+          <BreakingNews />
+        </div>
         <Navbar />
         <main className="flex-grow pt-20">
           <Routes>

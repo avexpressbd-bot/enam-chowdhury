@@ -1,34 +1,17 @@
 import Banner from "../components/ui/Banner";
 import { motion } from "motion/react";
 import { Play } from "lucide-react";
-
-const photos = [
-  "https://images.unsplash.com/photo-1540317580384-e5d43616b9aa?q=80&w=800",
-  "https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=800",
-  "https://images.unsplash.com/photo-1516062423079-7ca13cdc7f5a?q=80&w=800",
-  "https://images.unsplash.com/photo-1529070538774-1843cb3265df?q=80&w=800",
-  "https://images.unsplash.com/photo-1531050170041-f88f8d8ca801?q=80&w=800",
-  "https://images.unsplash.com/photo-1577416416829-d4368c6b91f1?q=80&w=800"
-];
-
-const videos = [
-  {
-    thumbnail: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=800",
-    title: "নির্বাচনী জনসভা ভিডিও",
-    date: "মে ২, ২০২৬"
-  },
-  {
-    thumbnail: "https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=800",
-    title: "বিশেষ ভিডিও বার্তা",
-    date: "এপ্রিল ২৫, ২০২৬"
-  }
-];
+import { useSettings } from "../lib/settings";
 
 export default function Gallery() {
+  const { settings } = useSettings();
+  const photos = settings.updates.map(u => u.image).concat(settings.aboutImage, settings.bannerImage);
+  const videos = settings.videos || [];
+
   return (
     <div id="gallery-page">
       <Banner 
-        image="https://images.unsplash.com/photo-1531050170041-f88f8d8ca801?q=80&w=2000"
+        image={settings.bannerImage}
         title="জনগণই আমাদের শক্তি।"
         subtitle="গ্যালারি"
       />
@@ -42,7 +25,7 @@ export default function Gallery() {
 
           {/* Photo Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-24">
-            {photos.map((photo, index) => (
+            {photos.filter(p => !!p).map((photo, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, scale: 0.95 }}
@@ -83,14 +66,18 @@ export default function Gallery() {
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute inset-0 bg-slate-900/40 flex items-center justify-center">
-                    <div className="w-20 h-20 bg-red-600 rounded-full flex items-center justify-center text-white transform group-hover:scale-110 transition-transform shadow-2xl">
+                    <a 
+                      href={vid.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="w-20 h-20 bg-red-600 rounded-full flex items-center justify-center text-white transform group-hover:scale-110 transition-transform shadow-2xl"
+                    >
                       <Play size={32} fill="currentColor" />
-                    </div>
+                    </a>
                   </div>
                 </div>
                 <div className="px-2">
                   <h3 className="text-2xl font-bold text-slate-900 tracking-tight group-hover:text-emerald-700 transition-colors uppercase">{vid.title}</h3>
-                  <p className="text-slate-500 font-bold mt-2">{vid.date}</p>
                 </div>
               </motion.div>
             ))}

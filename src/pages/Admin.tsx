@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../lib/auth";
 import { useSettings, SiteSettings } from "../lib/settings";
-import { LogIn, LogOut, Save, Image as ImageIcon, Settings as SettingsIcon, AlertCircle, CheckCircle, MessageSquare, User, Mail as MailIcon, Calendar } from "lucide-react";
+import { LogIn, LogOut, Save, Image as ImageIcon, Settings as SettingsIcon, AlertCircle, CheckCircle, MessageSquare, User, Mail as MailIcon, Calendar, Upload, Plus, X, Megaphone, PlayCircle } from "lucide-react";
 import { motion } from "motion/react";
 import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 import { db } from "../lib/firebase";
@@ -37,6 +37,76 @@ export default function Admin() {
       return () => unsubscribe();
     }
   }, [isAdmin]);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, field: keyof SiteSettings | string, index?: number, subfield?: string) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result as string;
+      if (!formData) return;
+
+      if (index !== undefined && subfield) {
+        // Handle array updates like manifesto or updates
+        const updatedArray = [...(formData[field as keyof SiteSettings] as any[])];
+        updatedArray[index] = { ...updatedArray[index], [subfield]: base64String };
+        setFormData({ ...formData, [field]: updatedArray });
+      } else {
+        // Handle top-level fields
+        setFormData({ ...formData, [field as keyof SiteSettings]: base64String });
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const addNewsItem = () => {
+    if (!formData) return;
+    const newItems = [...(formData.breakingNews || []), ""];
+    updateField('breakingNews', newItems);
+  };
+
+  const removeNewsItem = (index: number) => {
+    if (!formData) return;
+    const newItems = formData.breakingNews.filter((_, i) => i !== index);
+    updateField('breakingNews', newItems);
+  };
+
+  const updateNewsItem = (index: number, value: string) => {
+    if (!formData) return;
+    const newItems = [...formData.breakingNews];
+    newItems[index] = value;
+    updateField('breakingNews', newItems);
+  };
+
+  const FileUploadInput = ({ label, field, index, subfield }: { label: string, field: keyof SiteSettings | string, index?: number, subfield?: string }) => (
+    <div>
+      <label className="block text-xs font-black uppercase tracking-widest text-slate-500 mb-2">{label}</label>
+      <div className="flex items-center gap-4">
+        <label className="flex-1 cursor-pointer group">
+          <div className="flex items-center gap-3 px-4 py-3 bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl group-hover:border-red-400 group-hover:bg-red-50 transition-all">
+            <Upload size={18} className="text-slate-400 group-hover:text-red-600" />
+            <span className="text-sm font-bold text-slate-500 group-hover:text-red-700">ছবি সিলেক্ট করুন</span>
+            <input 
+              type="file" 
+              className="hidden" 
+              accept="image/*"
+              onChange={(e) => handleFileUpload(e, field, index, subfield)}
+            />
+          </div>
+        </label>
+        {(index !== undefined && subfield ? (formData?.[field as keyof SiteSettings] as any[])?.[index]?.[subfield] : formData?.[field as keyof SiteSettings]) && (
+          <div className="w-12 h-12 rounded-lg bg-slate-100 border overflow-hidden">
+            <img 
+              src={(index !== undefined && subfield ? (formData?.[field as keyof SiteSettings] as any[])?.[index]?.[subfield] : formData?.[field as keyof SiteSettings]) as string} 
+              alt="Preview" 
+              className="w-full h-full object-cover"
+            />
+          </div>
+        )}
+      </div>
+    </div>
+  );
 
   if (authLoading || settingsLoading) {
     return (
@@ -181,6 +251,38 @@ export default function Admin() {
       {activeTab === 'settings' ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-2 space-y-8">
+            {/* News Ticker */}
+            <section className="sleek-card p-8 bg-white border-t-4 border-t-amber-500">
+               <h2 className="text-xl font-bold mb-6 flex items-center gap-2 border-b pb-4">
+                <Megaphone size={20} className="text-amber-500" /> ব্রেকিং নিউজ স্লাইডার
+              </h2>
+              <div className="space-y-4">
+                {(formData?.breakingNews || []).map((news, idx) => (
+                  <div key={idx} className="flex gap-2">
+                    <input 
+                      type="text" 
+                      className="flex-1 px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none"
+                      placeholder="নিউজ হেডলাইন..."
+                      value={news}
+                      onChange={(e) => updateNewsItem(idx, e.target.value)}
+                    />
+                    <button 
+                      onClick={() => removeNewsItem(idx)}
+                      className="p-2 text-slate-400 hover:text-red-500 transition-colors"
+                    >
+                      <X size={20} />
+                    </button>
+                  </div>
+                ))}
+                <button 
+                  onClick={addNewsItem}
+                  className="flex items-center justify-center gap-2 w-full py-3 bg-amber-50 text-amber-700 border border-dashed border-amber-200 rounded-xl font-bold hover:bg-amber-100 transition-all"
+                >
+                  <Plus size={18} /> নতুন নিউজ যোগ করুন
+                </button>
+              </div>
+            </section>
+
             {/* General Settings */}
             <section className="sleek-card p-8 bg-white">
               <h2 className="text-xl font-bold mb-6 flex items-center gap-2 border-b pb-4">
@@ -208,29 +310,123 @@ export default function Admin() {
               </div>
             </section>
 
-            {/* Contact Info */}
+            {/* Media Gallery */}
             <section className="sleek-card p-8 bg-white">
               <h2 className="text-xl font-bold mb-6 flex items-center gap-2 border-b pb-4">
-                <ImageIcon size={20} className="text-emerald-600" /> ফটো ও মিডিয়া
+                <ImageIcon size={20} className="text-emerald-600" /> ফটো ও মিডিয়া (সরাসরি আপলোড)
               </h2>
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-xs font-black uppercase tracking-widest text-slate-500 mb-2">ব্যানার ইমেজ ইউআরএল</label>
-                  <input 
-                    type="text" 
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-red-600 outline-none"
-                    value={formData?.bannerImage || ""}
-                    onChange={(e) => updateField('bannerImage', e.target.value)}
-                  />
+              <div className="space-y-8">
+                <FileUploadInput label="ব্যানার ছবি" field="bannerImage" />
+                <FileUploadInput label="পরিচিতি ছবি" field="aboutImage" />
+                
+                <div className="border-t pt-8">
+                  <h3 className="font-bold text-slate-900 mb-4 uppercase tracking-wider text-sm flex items-center gap-2 text-emerald-700">
+                    <ImageIcon size={16} /> নির্বাচনী আপডেট গ্যালারি (ছবি ও ভিডিও)
+                  </h3>
+                  <div className="grid grid-cols-1 gap-6">
+                    {formData?.updates.map((update, idx) => (
+                      <div key={idx} className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex gap-4 items-start">
+                        <div className="flex-1 space-y-4">
+                           <input 
+                            type="text" 
+                            placeholder="শিরোনাম"
+                            className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg outline-none"
+                            value={update.title}
+                            onChange={(e) => {
+                              const newUpdates = [...(formData?.updates || [])];
+                              newUpdates[idx].title = e.target.value;
+                              updateField('updates', newUpdates);
+                            }}
+                          />
+                          <input 
+                            type="text" 
+                            placeholder="ভিডিও লিংক (ঐচ্ছিক)"
+                            className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg outline-none font-mono text-xs"
+                            value={update.videoUrl || ""}
+                            onChange={(e) => {
+                              const newUpdates = [...(formData?.updates || [])];
+                              newUpdates[idx].videoUrl = e.target.value;
+                              updateField('updates', newUpdates);
+                            }}
+                          />
+                          <FileUploadInput label="আপডেট ছবি (বা ভিডিও থাম্বনেইল)" field="updates" index={idx} subfield="image" />
+                        </div>
+                        <button 
+                          onClick={() => {
+                            const newUpdates = (formData?.updates || []).filter((_, i) => i !== idx);
+                            updateField('updates', newUpdates);
+                          }}
+                          className="p-2 text-slate-400 hover:text-red-500"
+                        >
+                          <X size={20} />
+                        </button>
+                      </div>
+                    ))}
+                    <button 
+                      onClick={() => {
+                        const newUpdates = [...(formData?.updates || []), { title: "নতুন আপডেট", description: "বর্ণনা...", image: "", videoUrl: "" }];
+                        updateField('updates', newUpdates);
+                      }}
+                      className="flex items-center justify-center gap-2 w-full py-4 bg-emerald-50 text-emerald-700 border border-dashed border-emerald-200 rounded-xl font-bold hover:bg-emerald-100 transition-all font-mono"
+                    >
+                      <Plus size={18} /> ADD NEW ITEM
+                    </button>
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-xs font-black uppercase tracking-widest text-slate-500 mb-2">পরিচিতি ইমেজ ইউআরএল</label>
-                  <input 
-                    type="text" 
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-red-600 outline-none"
-                    value={formData?.aboutImage || ""}
-                    onChange={(e) => updateField('aboutImage', e.target.value)}
-                  />
+
+                <div className="border-t pt-8">
+                  <h3 className="font-bold text-slate-900 mb-4 uppercase tracking-wider text-sm flex items-center gap-2 text-red-600">
+                    <PlayCircle size={16} /> ভিডিও গ্যালারি
+                  </h3>
+                  <div className="grid grid-cols-1 gap-6">
+                    {(formData?.videos || []).map((video, idx) => (
+                      <div key={idx} className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex gap-4 items-start">
+                        <div className="flex-1 space-y-4">
+                           <input 
+                            type="text" 
+                            placeholder="ভিডিও শিরোনাম"
+                            className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg outline-none font-bold"
+                            value={video.title}
+                            onChange={(e) => {
+                              const newVideos = [...(formData?.videos || [])];
+                              newVideos[idx].title = e.target.value;
+                              updateField('videos', newVideos);
+                            }}
+                          />
+                          <input 
+                            type="text" 
+                            placeholder="ভিডিও ইউআরএল (YouTube)"
+                            className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg outline-none font-mono text-xs"
+                            value={video.url}
+                            onChange={(e) => {
+                              const newVideos = [...(formData?.videos || [])];
+                              newVideos[idx].url = e.target.value;
+                              updateField('videos', newVideos);
+                            }}
+                          />
+                          <FileUploadInput label="থাম্বনেইল ইমেজ" field="videos" index={idx} subfield="thumbnail" />
+                        </div>
+                        <button 
+                          onClick={() => {
+                            const newVideos = (formData?.videos || []).filter((_, i) => i !== idx);
+                            updateField('videos', newVideos);
+                          }}
+                          className="p-2 text-slate-400 hover:text-red-500"
+                        >
+                          <X size={20} />
+                        </button>
+                      </div>
+                    ))}
+                    <button 
+                      onClick={() => {
+                        const newVideos = [...(formData?.videos || []), { title: "নতুন ভিডিও", url: "", thumbnail: "" }];
+                        updateField('videos', newVideos);
+                      }}
+                      className="flex items-center justify-center gap-2 w-full py-4 bg-red-50 text-red-700 border border-dashed border-red-200 rounded-xl font-bold hover:bg-red-100 transition-all"
+                    >
+                      <Plus size={18} /> নতুন ভিডিও যোগ করুন
+                    </button>
+                  </div>
                 </div>
               </div>
             </section>
@@ -281,13 +477,22 @@ export default function Admin() {
                       onChange={(e) => updateField('address', e.target.value)}
                     />
                  </div>
+                 <div>
+                   <label className="block text-xs font-black uppercase tracking-widest text-slate-500 mb-1">ফেসবুক লিংক</label>
+                   <input 
+                      type="text" 
+                      className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none font-mono text-xs"
+                      value={formData?.facebookUrl || ""}
+                      onChange={(e) => updateField('facebookUrl', e.target.value)}
+                    />
+                 </div>
                </div>
                <button 
                   onClick={handleSave}
                   disabled={isSaving}
-                  className="w-full mt-8 flex items-center justify-center gap-2 bg-emerald-700 text-white py-4 rounded-xl font-bold hover:bg-emerald-800 transition-all shadow-lg disabled:opacity-50"
+                  className="w-full mt-8 flex items-center justify-center gap-2 bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-black transition-all shadow-xl disabled:opacity-50"
                >
-                 <Save size={20} /> {isSaving ? 'সেভ হচ্ছে...' : 'পরিবর্তন সেভ করুন'}
+                 <Save size={20} /> {isSaving ? 'সেভ হচ্ছে...' : 'সেভ করুন'}
                </button>
             </section>
           </div>

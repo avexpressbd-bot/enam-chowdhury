@@ -12,6 +12,7 @@ export interface SiteSettings {
   email: string;
   address: string;
   facebookUrl: string;
+  breakingNews: string[];
   manifesto: {
     title: string;
     description: string;
@@ -21,6 +22,12 @@ export interface SiteSettings {
     title: string;
     description: string;
     image: string;
+    videoUrl?: string;
+  }[];
+  videos: {
+    title: string;
+    url: string;
+    thumbnail: string;
   }[];
 }
 
@@ -34,6 +41,11 @@ const defaultSettings: SiteSettings = {
   email: "enam.bishnupur@gmail.com",
   address: "বিষ্ণুপুর ইউনিয়ন কার্যালয়, চাঁদপুর",
   facebookUrl: "#",
+  breakingNews: [
+    "বিষ্ণুপুর ইউনিয়নের উন্নয়নে এনাম ভাইয়ের নতুন উদ্যোগ।",
+    "আগামীকাল বিকাল ৪টায় ৩নং ওয়ার্ডে বিশেষ পথসভা অনুষ্ঠিত হবে।",
+    "তরুণ সমাজের উন্নয়নে পাঠাগার নির্মাণের কাজ শুরু হলো।"
+  ],
   manifesto: [
     { title: "মাদকমুক্ত বিষ্ণুপুর", description: "তরুণদের খেলাধুলার সুযোগ এবং মাদকের বিরুদ্ধে জিরো টলারেন্স নীতি।", icon: "Zap" },
     { title: "আধুনিক যাতায়াত", description: "ইউনিয়নের প্রতিটি রাস্তা মেরামত ও নতুন রাস্তা নির্মাণ।", icon: "Map" },
@@ -44,6 +56,10 @@ const defaultSettings: SiteSettings = {
     { title: "বড় নির্বাচনী জনসভা", description: "বিষ্ণুপুর হাই স্কুল মাঠে আয়োজিত নির্বাচনী জনসভায় এনাম ভাইয়ের বক্তব্য।", image: "https://images.unsplash.com/photo-1540317580384-e5d43616b9aa?q=80&w=800" },
     { title: "গণসংযোগ ও উঠান বৈঠক", description: "বিষ্ণুপুর ৩নং ওয়ার্ডের সাধারণ মানুষের সাথে মতবিনিময় সভা।", image: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=800" },
     { title: "তারুণ্যের কথা", description: "ইউনিয়নের তরুণ প্রজন্মের সাথে সমৃদ্ধ বিষ্ণুপুর বিনির্মাণে আলোচনা।", image: "https://images.unsplash.com/photo-1491438590914-bc09fcaaf77a?q=80&w=800" }
+  ],
+  videos: [
+    { title: "বিষ্ণুপুরের উন্নয়নের রোডম্যাপ", url: "#", thumbnail: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?q=80&w=800" },
+    { title: "সাধারণ মানুষের অধিকার নিয়ে বক্তব্য", url: "#", thumbnail: "https://images.unsplash.com/photo-1577563906417-45bc460599a7?q=80&w=800" }
   ]
 };
 
