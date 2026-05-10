@@ -32,25 +32,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const normalizedUserEmail = user.email?.toLowerCase().trim();
           const targetAdminEmail = "jummanbepari5@gmail.com".toLowerCase().trim();
           
-          console.log("Auth User detected:", normalizedUserEmail, "UID:", user.uid);
+          console.log("Auth User detected:", normalizedUserEmail);
+          
+          // Primary check: Email match (instant)
+          if (normalizedUserEmail === targetAdminEmail) {
+            console.log("Admin match found by email!");
+            setIsAdmin(true);
+            setLoading(false);
+            return;
+          }
+
+          // Secondary check: Database check (if logic exists there)
           try {
             const adminDoc = await getDoc(doc(db, "admins", user.uid));
-            const isUserAdmin = adminDoc?.exists() || normalizedUserEmail === targetAdminEmail;
-            
-            console.log("Admin Check Details:", { 
-              isUserAdmin, 
-              docExists: adminDoc?.exists(), 
-              emailMatch: normalizedUserEmail === targetAdminEmail,
-              userEmail: normalizedUserEmail,
-              targetEmail: targetAdminEmail
-            });
-            
-            setIsAdmin(isUserAdmin);
+            if (adminDoc?.exists()) {
+              console.log("Admin match found in Database!");
+              setIsAdmin(true);
+            } else {
+              setIsAdmin(false);
+            }
           } catch (error) {
-            console.error("Admin check failed (likely permissions or network):", error);
-            const isUserAdmin = normalizedUserEmail === targetAdminEmail;
-            console.log("Falling back to email-only admin check:", isUserAdmin);
-            setIsAdmin(isUserAdmin);
+            console.error("Database admin check skipped or failed:", error);
+            setIsAdmin(false);
           }
         } else {
           setIsAdmin(false);
