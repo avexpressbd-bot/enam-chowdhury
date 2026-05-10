@@ -8,6 +8,7 @@ interface AuthContextType {
   isAdmin: boolean;
   loading: boolean;
   login: () => Promise<void>;
+  loginWithCredentials: (username: string, password: string) => boolean;
   logout: () => Promise<void>;
 }
 
@@ -16,7 +17,14 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [manualIsAdmin, setManualIsAdmin] = useState(() => {
+    return localStorage.getItem("manual_admin") === "true";
+  });
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    localStorage.setItem("manual_admin", String(manualIsAdmin));
+  }, [manualIsAdmin]);
 
   useEffect(() => {
     if (!isFirebaseConfigured || !auth || typeof auth.onAuthStateChanged !== 'function') {
@@ -84,11 +92,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = async () => {
+    setManualIsAdmin(false);
     await signOut(auth);
   };
 
+  const loginWithCredentials = (username: string, password: string) => {
+    if (username === "admin" && password === "admin123") {
+      setManualIsAdmin(true);
+      return true;
+    }
+    return false;
+  };
+
   return (
-    <AuthContext.Provider value={{ user, isAdmin, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, isAdmin: isAdmin || manualIsAdmin, loading, login, loginWithCredentials, logout }}>
       {children}
     </AuthContext.Provider>
   );

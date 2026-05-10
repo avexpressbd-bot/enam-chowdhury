@@ -7,13 +7,18 @@ import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 import { db } from "../lib/firebase";
 
 export default function Admin() {
-  const { user, isAdmin, loading: authLoading, login, logout } = useAuth();
+  const { user, isAdmin, loading: authLoading, login, logout, loginWithCredentials } = useAuth();
   const { settings, updateSettings, loading: settingsLoading } = useSettings();
   const [formData, setFormData] = useState<SiteSettings | null>(null);
   const [status, setStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<'settings' | 'messages'>('settings');
   const [messages, setMessages] = useState<any[]>([]);
+  
+  // Manual login states
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [manualLoginError, setManualLoginError] = useState("");
 
   // Initialize form data when settings are loaded
   useEffect(() => {
@@ -41,98 +46,71 @@ export default function Admin() {
     );
   }
 
-  if (!user || !isAdmin) {
+  if (!isAdmin) {
     return (
-      <div className="max-w-md mx-auto my-20 p-8 sleek-card text-center">
-        <div className="w-20 h-20 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto mb-6">
-          <SettingsIcon size={40} />
+      <div className="max-w-md mx-auto my-12 p-8 sleek-card">
+        <div className="w-16 h-16 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+          <SettingsIcon size={32} />
         </div>
-        <h1 className="text-2xl font-bold mb-4">অ্যাডমিন প্যানেল</h1>
-        {user ? (
-          <div className="mb-8 space-y-4">
-            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
-              <p className="text-sm text-slate-500 mb-1">লগইন করা ইমেইল:</p>
-              <p className="font-bold text-slate-900 break-all">{user.email || "No Email Found"}</p>
-            </div>
-            
-            <div className="p-4 bg-red-50 rounded-2xl border border-red-100">
-              <p className="text-red-600 text-sm font-bold flex items-center justify-center gap-2">
-                <AlertCircle size={16} /> অ্যাডমিন এক্সেস নেই
-              </p>
-              <p className="text-red-500 text-xs mt-1">আপনার এই ইমেইলটি অ্যাডমিন হিসেবে তালিকাভুক্ত নয়।</p>
-            </div>
-
-            <div className="bg-amber-50 p-4 rounded-xl border border-amber-100 text-amber-800 text-xs text-left">
-              <p className="font-bold mb-2 flex items-center gap-2">
-                <SettingsIcon size={14} /> কী করবেন?
-              </p>
-              <ol className="list-decimal pl-4 space-y-3">
-                <li>আপনার পাঠানো স্ক্রিনশটে যে নীল রঙের <strong>"Save"</strong> বাটন আছে সেটি ক্লিক করুন।</li>
-                <li>
-                  নিচের ডোমেইনগুলো কপি করে Firebase Console-এ <strong>Authentication {'->'} Settings {'->'} Authorized domains</strong>-এ "Add domain" বাটনে ক্লিক করে একটি একটি করে অ্যাড করুন:
-                  <div className="mt-2 space-y-1 font-mono bg-white/50 p-2 rounded-lg border border-amber-200">
-                    <p className="select-all">ais-pre-qqwzr5d4nlzk67hdxyd7lw-165413010212.asia-east1.run.app</p>
-                    <p className="select-all">ais-dev-qqwzr5d4nlzk67hdxyd7lw-165413010212.asia-east1.run.app</p>
-                  </div>
-                </li>
-                <li>নিশ্চিত করুন আপনি <strong>jummanbepari5@gmail.com</strong> দিয়ে লগইন করেছেন।</li>
-              </ol>
-            </div>
-
-            <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 text-blue-800 text-xs text-left">
-              <p className="font-bold mb-2 flex items-center gap-2">
-                <CheckCircle size={14} /> Firestore Rules সেটআপ
-              </p>
-              <p className="mb-2">Firestore Database-এ গিয়ে "Rules" ট্যাবে নিচের কোডটি কপি করে পেস্ট করুন এবং "Publish" করুন:</p>
-              <pre className="p-3 bg-slate-900 text-slate-100 rounded-lg overflow-x-auto text-[10px]">
-{`rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if request.auth != null && 
-      request.auth.token.email == "jummanbepari5@gmail.com";
-    }
-  }
-}`}
-              </pre>
-            </div>
-            
-            <div className="text-left text-[10px] text-slate-400 font-mono bg-slate-50 p-3 rounded-lg overflow-auto max-h-40 border border-slate-200">
-              <p className="text-slate-500 font-bold border-b pb-1 mb-1">Debug Status:</p>
-              <p>Email: {user.email || "No Email Found"}</p>
-              <p>User UID: {user.uid}</p>
-              <p>IsAdmin (App State): {String(isAdmin)}</p>
-              <p>Domain: {window.location.hostname}</p>
-            </div>
-          </div>
-        ) : (
-          <p className="text-slate-600 mb-8">এই পৃষ্ঠাটি শুধুমাত্র অ্যাডমিনদের জন্য। অনুগ্রহ করে লগইন করুন।</p>
-        )}
+        <h1 className="text-2xl font-black text-center mb-8">অ্যাডমিন লগইন</h1>
         
-        {!user ? (
+        <div className="space-y-4 mb-8">
+          <div>
+            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5 ml-1">ইউজার নেম</label>
+            <input 
+              type="text" 
+              placeholder="admin"
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-600 outline-none transition-all"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5 ml-1">পাসওয়ার্ড</label>
+            <input 
+              type="password" 
+              placeholder="admin123"
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-600 outline-none transition-all"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+          
+          {manualLoginError && (
+            <p className="text-red-500 text-xs font-bold text-center mt-2">{manualLoginError}</p>
+          )}
+
           <button 
-            onClick={async () => {
-              try {
-                await login();
-              } catch (e: any) {
-                console.error("Login error:", e);
-                const errorCode = e.code || "unknown";
-                const errorMessage = e.message || "সমস্যা হয়েছে";
-                alert(`লগইন করতে সমস্যা হয়েছে।\nError Code: ${errorCode}\nError: ${errorMessage}\n\nপরামর্শ: Firebase-এ Google Auth ইনাবল আছে কি না এবং Authorized Domains-এ আপনার সাইট অ্যাড করা আছে কি না চেক করুন।`);
+            onClick={() => {
+              const success = loginWithCredentials(username, password);
+              if (!success) {
+                setManualLoginError("ইউজারনেম বা পাসওয়ার্ড ভুল!");
               }
             }}
-            className="w-full flex items-center justify-center gap-2 bg-red-600 text-white py-4 rounded-xl font-bold hover:bg-red-700 transition-all shadow-lg shadow-red-100"
+            className="w-full bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-black transition-all shadow-lg"
           >
-            <LogIn size={20} /> গুগল দিয়ে লগইন করুন
+            প্রবেশ করুন
           </button>
-        ) : (
-          <button 
-            onClick={logout}
-            className="w-full flex items-center justify-center gap-2 bg-slate-200 text-slate-700 py-4 rounded-xl font-bold hover:bg-slate-300 transition-all"
-          >
-            <LogOut size={20} /> অন্য একাউন্ট দিয়ে চেষ্টা করুন
-          </button>
-        )}
+        </div>
+
+        <div className="relative my-8">
+          <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200"></div></div>
+          <div className="relative flex justify-center text-xs uppercase"><span className="bg-white px-4 text-slate-400 font-bold tracking-widest">অথবা</span></div>
+        </div>
+
+        <button 
+          onClick={async () => {
+            try {
+              await login();
+            } catch (e: any) {
+              console.error("Login error:", e);
+              alert("গুগল লগইন বর্তমানে ডোমেইন এর কারণে সমস্যা করতে পারে। দয়া করে ওপরের ইউজারনেম ও পাসওয়ার্ড ব্যবহার করুন।");
+            }
+          }}
+          className="w-full flex items-center justify-center gap-2 bg-white border-2 border-slate-100 text-slate-700 py-4 rounded-xl font-bold hover:bg-slate-50 transition-all font-mono"
+        >
+          <LogIn size={20} className="text-red-600" /> Google Login
+        </button>
       </div>
     );
   }
