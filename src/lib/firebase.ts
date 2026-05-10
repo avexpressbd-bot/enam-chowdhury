@@ -3,36 +3,26 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getAnalytics } from 'firebase/analytics';
 
-// Simplified config loading for AI Studio environment
-// @ts-ignore
-import localConfig from '../../firebase-applet-config.json';
-
-// Standard Firebase initialization
+// Standard Firebase configuration hardcoded for maximum reliability
 const firebaseConfig: any = {
-  apiKey: (import.meta as any).env?.VITE_FIREBASE_API_KEY || localConfig?.apiKey,
-  authDomain: (import.meta as any).env?.VITE_FIREBASE_AUTH_DOMAIN || localConfig?.authDomain,
-  projectId: (import.meta as any).env?.VITE_FIREBASE_PROJECT_ID || localConfig?.projectId,
-  storageBucket: (import.meta as any).env?.VITE_FIREBASE_STORAGE_BUCKET || localConfig?.storageBucket,
-  messagingSenderId: (import.meta as any).env?.VITE_FIREBASE_MESSAGING_SENDER_ID || localConfig?.messagingSenderId,
-  appId: (import.meta as any).env?.VITE_FIREBASE_APP_ID || localConfig?.appId,
-  measurementId: (import.meta as any).env?.VITE_FIREBASE_MEASUREMENT_ID || localConfig?.measurementId,
-  firestoreDatabaseId: (import.meta as any).env?.VITE_FIREBASE_DATABASE_ID || localConfig?.firestoreDatabaseId || "(default)"
+  projectId: "enam-chowdhury",
+  appId: "1:677929479067:web:78aa29b366344d34ac4f3e",
+  apiKey: "AIzaSyAZjAOptZgTdvCiC9fCpFZHxxONxpzg0Gc",
+  authDomain: "enam-chowdhury.firebaseapp.com",
+  firestoreDatabaseId: "(default)",
+  storageBucket: "enam-chowdhury.firebasestorage.app",
+  messagingSenderId: "677929479067",
+  measurementId: "G-XL5N84B4H3"
 };
 
 // For now, let's just make sure we don't crash if things are missing
-export const isFirebaseConfigured = !!(firebaseConfig.apiKey && firebaseConfig.projectId);
+export const isFirebaseConfigured = true;
 
-const app = isFirebaseConfigured ? initializeApp(firebaseConfig) : null;
-export const db = app ? getFirestore(app, firebaseConfig.firestoreDatabaseId) : ({} as any);
-export const auth = app ? getAuth(app) : ({} as any);
-export const analytics = app && typeof window !== 'undefined' ? getAnalytics(app) : null;
+const app = initializeApp(firebaseConfig);
+export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+export const auth = getAuth(app);
+export const analytics = null;
 export const firebaseApp = app;
-
-if (typeof window !== 'undefined') {
-  (window as any).db = db;
-  (window as any).auth = auth;
-  (window as any).firebaseConfig = firebaseConfig;
-}
 
 export enum OperationType {
   CREATE = 'create',

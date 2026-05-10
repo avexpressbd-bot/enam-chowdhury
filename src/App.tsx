@@ -16,8 +16,6 @@ import Admin from "./pages/Admin";
 import { AuthProvider, useAuth } from "./lib/auth";
 import { SettingsProvider, useSettings } from "./lib/settings";
 import { isFirebaseConfigured } from "./lib/firebase";
-// @ts-ignore
-import localConfig from "../firebase-applet-config.json";
 import { AlertCircle } from "lucide-react";
 
 function ScrollToTop() {
@@ -61,7 +59,7 @@ function AppContent() {
             <div className="p-3 bg-white border border-slate-200 rounded-xl shadow-sm">
               <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-1">কানেকশন ইনফো</p>
               <p className="text-xs font-bold text-slate-600 truncate">
-                {!isFirebaseConfigured ? "Firebase Not Set" : `Project: ${localConfig?.projectId || 'Configured'}`}
+                {!isFirebaseConfigured ? "Firebase Not Set" : `Project: enam-chowdhury`}
               </p>
             </div>
           </div>

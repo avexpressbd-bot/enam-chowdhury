@@ -60,7 +60,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!isFirebaseConfigured || !db || typeof db.type !== 'string') {
+    if (!isFirebaseConfigured || !db) {
       console.warn("Firebase Firestore not initialized correctly");
       setLoading(false);
       return;

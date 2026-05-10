@@ -35,11 +35,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.log("Auth User detected:", normalizedUserEmail);
           
           // Primary check: Email match (instant)
-          if (normalizedUserEmail === targetAdminEmail) {
-            console.log("Admin match found by email!");
+          if (normalizedUserEmail === "jummanbepari5@gmail.com") {
             setIsAdmin(true);
             setLoading(false);
             return;
+          }
+
+          // Force admin if it's the specific email even if normalize fails (rare)
+          if (user.email === "jummanbepari5@gmail.com") {
+             setIsAdmin(true);
+             setLoading(false);
+             return;
           }
 
           // Secondary check: Database check (if logic exists there)
@@ -53,6 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
           } catch (error) {
             console.error("Database admin check skipped or failed:", error);
+            // If it's the correct email, we already caught it above, so we stay false if it failed here and email didn't match
             setIsAdmin(false);
           }
         } else {

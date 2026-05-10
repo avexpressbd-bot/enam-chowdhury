@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../lib/auth";
 import { useSettings, SiteSettings } from "../lib/settings";
-import { LogIn, LogOut, Save, Image as ImageIcon, Settings as SettingsIcon, AlertCircle, CheckCircle2, MessageSquare, User, Mail as MailIcon, Calendar } from "lucide-react";
+import { LogIn, LogOut, Save, Image as ImageIcon, Settings as SettingsIcon, AlertCircle, CheckCircle, MessageSquare, User, Mail as MailIcon, Calendar } from "lucide-react";
 import { motion } from "motion/react";
 import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 import { db } from "../lib/firebase";
@@ -66,11 +66,35 @@ export default function Admin() {
               <p className="font-bold mb-2 flex items-center gap-2">
                 <SettingsIcon size={14} /> কী করবেন?
               </p>
-              <ol className="list-decimal pl-4 space-y-2">
+              <ol className="list-decimal pl-4 space-y-3">
                 <li>আপনার পাঠানো স্ক্রিনশটে যে নীল রঙের <strong>"Save"</strong> বাটন আছে সেটি ক্লিক করুন।</li>
-                <li>Firebase Console-এ <strong>Authentication {'->'} Settings {'->'} Authorized domains</strong>-এ গিয়ে আপনার অ্যাপের ডোমেইনটি (asia-east1.run.app) অ্যাড করুন।</li>
+                <li>
+                  নিচের ডোমেইনগুলো কপি করে Firebase Console-এ <strong>Authentication {'->'} Settings {'->'} Authorized domains</strong>-এ "Add domain" বাটনে ক্লিক করে একটি একটি করে অ্যাড করুন:
+                  <div className="mt-2 space-y-1 font-mono bg-white/50 p-2 rounded-lg border border-amber-200">
+                    <p className="select-all">ais-pre-qqwzr5d4nlzk67hdxyd7lw-165413010212.asia-east1.run.app</p>
+                    <p className="select-all">ais-dev-qqwzr5d4nlzk67hdxyd7lw-165413010212.asia-east1.run.app</p>
+                  </div>
+                </li>
                 <li>নিশ্চিত করুন আপনি <strong>jummanbepari5@gmail.com</strong> দিয়ে লগইন করেছেন।</li>
               </ol>
+            </div>
+
+            <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 text-blue-800 text-xs text-left">
+              <p className="font-bold mb-2 flex items-center gap-2">
+                <CheckCircle size={14} /> Firestore Rules সেটআপ
+              </p>
+              <p className="mb-2">Firestore Database-এ গিয়ে "Rules" ট্যাবে নিচের কোডটি কপি করে পেস্ট করুন এবং "Publish" করুন:</p>
+              <pre className="p-3 bg-slate-900 text-slate-100 rounded-lg overflow-x-auto text-[10px]">
+{`rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if request.auth != null && 
+      request.auth.token.email == "jummanbepari5@gmail.com";
+    }
+  }
+}`}
+              </pre>
             </div>
             
             <div className="text-left text-[10px] text-slate-400 font-mono bg-slate-50 p-3 rounded-lg overflow-auto max-h-40 border border-slate-200">
@@ -78,7 +102,7 @@ export default function Admin() {
               <p>Email: {user.email || "No Email Found"}</p>
               <p>User UID: {user.uid}</p>
               <p>IsAdmin (App State): {String(isAdmin)}</p>
-              <p>Browser: {navigator.userAgent.substring(0, 50)}...</p>
+              <p>Domain: {window.location.hostname}</p>
             </div>
           </div>
         ) : (
@@ -171,7 +195,7 @@ export default function Admin() {
             status.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-red-50 text-red-700 border border-red-100'
           }`}
         >
-          {status.type === 'success' ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
+          {status.type === 'success' ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
           <span className="font-bold">{status.message}</span>
         </motion.div>
       )}
