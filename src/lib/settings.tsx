@@ -75,40 +75,41 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<SiteSettings>(defaultSettings);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+    useEffect(() => {
     if (!isFirebaseConfigured || !db) {
       console.warn("Firebase Firestore not initialized correctly");
       setLoading(false);
       return;
     }
 
-    try {
-      const docRef = doc(db, "settings", "global");
-      
-      const unsubscribe = onSnapshot(docRef, (snap) => {
-        setLoading(false); // Ensure loading is false as soon as we get a response
-        if (snap.exists()) {
-          console.log("Settings data received:", snap.id);
-          const data = snap.data();
-          setSettings({
-            ...defaultSettings,
-            ...data,
-            // Deep merge for arrays if needed, but simple merge for now
-          } as SiteSettings);
-        } else {
-          console.log("No settings document found, using defaults");
-        }
-        setLoading(false);
-      }, (error) => {
-        console.error("Settings load failed:", error);
-        setLoading(false);
-      });
-
-      return () => unsubscribe();
-    } catch (error) {
-      console.error("Failed to setup settings snapshot:", error);
+    const docRef = doc(db, "settings", "global");
+    
+    // Safety timeout: if Firestore takes too long, just hide loader and show defaults
+    const timer = setTimeout(() => {
+      console.warn("Settings loading timed out - using defaults");
       setLoading(false);
-    }
+    }, 5000);
+
+    const unsubscribe = onSnapshot(docRef, (snap) => {
+      clearTimeout(timer);
+      if (snap.exists()) {
+        const data = snap.data();
+        setSettings({
+          ...defaultSettings,
+          ...data,
+        } as SiteSettings);
+      }
+      setLoading(false);
+    }, (error) => {
+      clearTimeout(timer);
+      console.error("Settings lead error:", error);
+      setLoading(false);
+    });
+
+    return () => {
+      clearTimeout(timer);
+      unsubscribe();
+    };
   }, []);
 
   const updateSettings = async (newSettings: SiteSettings) => {

@@ -71,7 +71,7 @@ function AppContent() {
                 <AlertCircle className="shrink-0 text-amber-600" size={18} />
                 <p className="font-bold">বেশি সময় লাগছে!</p>
               </div>
-              <p className="mb-4 text-xs leading-relaxed opacity-80">যদি সাইটটি লোড না হয়, তাহলে নিশ্চিত করুন যে Firebase-এ আপনার ডোমেইনটি Authorized Domains হিসেবে যুক্ত আছে।</p>
+              <p className="mb-4 text-xs leading-relaxed opacity-80">যদি সাইটটি লোড না হয়, তাহলে নিশ্চিত করুন যে আপনি Firebase-এ **Cloud Firestore Rules** ঠিকভাবে সেটআপ করেছেন (Realtime Database নয়)।</p>
               <button 
                 onClick={() => window.location.reload()}
                 className="w-full bg-amber-600 text-white px-4 py-3 rounded-xl font-bold text-xs hover:bg-amber-700 transition-all flex items-center justify-center gap-2"

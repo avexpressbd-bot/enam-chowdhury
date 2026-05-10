@@ -212,9 +212,9 @@ export default function Admin() {
       console.error("Save error:", error);
       let msg = 'সেভ করতে সমস্যা হয়েছে।';
       if (error.message?.includes('smaller images') || error.message?.includes('too large')) {
-        msg = 'ছবির সাইজ অনেক বড়! দয়া করে ছোট সাইজের ছবি ব্যবহার করুন (১ মেগাবাইট এর কম)।';
+        msg = 'ছবির সাইজ অনেক বড়! দয়া করে ছোট সাইজের ছবি ব্যবহার করুন (১ মেগাবাইট এর কম)। টিপস: ছবিগুলো অনলাইনে "Compress" করে আপলোড করুন।';
       } else if (error.message?.includes('permission-denied')) {
-        msg = 'পারমিশন নেই! Firebase Rules সঠিকভাবে সেটআপ করুন।';
+        msg = 'পারমিশন নেই! Firebase-এ Cloud Firestore Rules সঠিকভাবে সেটআপ করুন (Realtime Database নয়)।';
       }
       setStatus({ type: 'error', message: msg });
     } finally {
