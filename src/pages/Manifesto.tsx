@@ -35,7 +35,7 @@ export default function Manifesto() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {settings.manifesto.map((point, index) => (
+            {(settings.manifesto || []).map((point, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}

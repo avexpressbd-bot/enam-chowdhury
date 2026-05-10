@@ -5,7 +5,7 @@ import { useSettings } from "../lib/settings";
 
 export default function Gallery() {
   const { settings } = useSettings();
-  const photos = settings.updates.map(u => u.image).concat(settings.aboutImage, settings.bannerImage);
+  const photos = (settings.updates || []).map(u => u.image).concat(settings.aboutImage, settings.bannerImage);
   const videos = settings.videos || [];
 
   return (
@@ -25,7 +25,7 @@ export default function Gallery() {
 
           {/* Photo Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-24">
-            {photos.filter(p => !!p).map((photo, index) => (
+            {(photos || []).filter(p => !!p).map((photo, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, scale: 0.95 }}

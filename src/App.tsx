@@ -128,43 +128,46 @@ function AppContent() {
   );
 }
 
-function ErrorBoundary({ children }: { children: React.ReactNode }) {
-  const [hasError, setHasError] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-
-  useEffect(() => {
-    const handleError = (event: ErrorEvent) => {
-      setHasError(true);
-      setError(event.error);
-    };
-    window.addEventListener('error', handleError);
-    return () => window.removeEventListener('error', handleError);
-  }, []);
-
-  if (hasError) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white p-8">
-        <div className="max-w-md w-full bg-white p-10 rounded-3xl shadow-2xl border border-red-100 flex flex-col items-center text-center">
-          <div className="w-20 h-20 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center mb-8">
-            <AlertCircle size={48} />
-          </div>
-          <h1 className="text-3xl font-black text-slate-900 mb-4 tracking-tight">রানিং এরর</h1>
-          <p className="text-slate-500 mb-10 leading-relaxed font-medium">অ্যাপটি লোড করার সময় একটি ত্রুটি হয়েছে। নিচে বিস্তারিত দেওয়া হলো:</p>
-          <div className="w-full bg-slate-900 text-red-400 p-6 rounded-2xl overflow-auto text-xs font-mono mb-10 max-h-48 text-left border border-slate-800 shadow-inner">
-            {error?.stack || error?.message || "Unknown error occurred"}
-          </div>
-          <button 
-            onClick={() => window.location.reload()}
-            className="w-full bg-red-600 text-white py-5 rounded-2xl font-black text-lg hover:bg-slate-900 hover:scale-95 active:scale-90 transition-all shadow-xl shadow-red-100"
-          >
-            পেজটি রিফ্রেশ করুন
-          </button>
-        </div>
-      </div>
-    );
+class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean; error: Error | null }> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false, error: null };
   }
 
-  return <>{children}</>;
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error("Uncaught error:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-white p-8">
+          <div className="max-w-md w-full bg-white p-10 rounded-3xl shadow-2xl border border-red-100 flex flex-col items-center text-center">
+            <div className="w-20 h-20 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center mb-8">
+              <AlertCircle size={48} />
+            </div>
+            <h1 className="text-3xl font-black text-slate-900 mb-4 tracking-tight">রানিং এরর</h1>
+            <p className="text-slate-500 mb-10 leading-relaxed font-medium">অ্যাপটি লোড করার সময় একটি ত্রুটি হয়েছে। নিচে বিস্তারিত দেওয়া হলো:</p>
+            <div className="w-full bg-slate-900 text-red-400 p-6 rounded-2xl overflow-auto text-xs font-mono mb-10 max-h-48 text-left border border-slate-800 shadow-inner">
+              {this.state.error?.stack || this.state.error?.message || "Unknown error occurred"}
+            </div>
+            <button 
+              onClick={() => window.location.reload()}
+              className="w-full bg-red-600 text-white py-5 rounded-2xl font-black text-lg hover:bg-slate-900 hover:scale-95 active:scale-90 transition-all shadow-xl shadow-red-100"
+            >
+              পেজটি রিফ্রেশ করুন
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
 }
 
 export default function App() {

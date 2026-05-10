@@ -97,6 +97,11 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         setSettings({
           ...defaultSettings,
           ...data,
+          // Extra safety: ensure arrays are always arrays even if database has null/missing
+          breakingNews: Array.isArray(data.breakingNews) ? data.breakingNews : (settings.breakingNews || defaultSettings.breakingNews),
+          manifesto: Array.isArray(data.manifesto) ? data.manifesto : (settings.manifesto || defaultSettings.manifesto),
+          updates: Array.isArray(data.updates) ? data.updates : (settings.updates || defaultSettings.updates),
+          videos: Array.isArray(data.videos) ? data.videos : (settings.videos || defaultSettings.videos),
         } as SiteSettings);
       }
       setLoading(false);
