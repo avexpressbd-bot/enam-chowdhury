@@ -414,6 +414,17 @@ export default function Admin() {
                               updateField('updates', newUpdates);
                             }}
                           />
+                          <textarea 
+                            placeholder="বিস্তারিত বর্ণনা"
+                            rows={2}
+                            className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg outline-none text-sm"
+                            value={update.description}
+                            onChange={(e) => {
+                              const newUpdates = [...(formData?.updates || [])];
+                              newUpdates[idx].description = e.target.value;
+                              updateField('updates', newUpdates);
+                            }}
+                          />
                           <input 
                             type="text" 
                             placeholder="ভিডিও লিংক (ঐচ্ছিক)"

@@ -17,7 +17,11 @@ export default function BreakingNews() {
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      <div className="max-w-7xl mx-auto flex items-center">
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="max-w-7xl mx-auto flex items-center"
+      >
         <div className="bg-slate-900 px-4 py-2 flex items-center gap-2 font-black text-xs uppercase tracking-widest z-10 relative shadow-[10px_0_15px_rgba(0,0,0,0.2)]">
           <Megaphone size={14} className="text-red-500 animate-pulse" />
           <span className="whitespace-nowrap">ব্রেকিং নিউজ</span>
@@ -26,11 +30,12 @@ export default function BreakingNews() {
         <div className="flex-1 relative h-10 flex items-center overflow-hidden">
           <motion.div 
             className="flex items-center gap-12 whitespace-nowrap absolute left-0"
+            initial={{ x: "0%" }}
             animate={isPaused ? {} : {
-              x: ["100%", "-100%"]
+              x: ["0%", "-100%"]
             }}
             transition={{
-              duration: 250, // Ultra slow for maximum readability
+              duration: 120, // Slightly faster, still readable
               repeat: Infinity,
               ease: "linear"
             }}
@@ -50,7 +55,7 @@ export default function BreakingNews() {
             ))}
           </motion.div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
