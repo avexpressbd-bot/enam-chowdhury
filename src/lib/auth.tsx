@@ -18,12 +18,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [manualIsAdmin, setManualIsAdmin] = useState(() => {
-    return localStorage.getItem("manual_admin") === "true";
+    try {
+      return localStorage.getItem("manual_admin") === "true";
+    } catch (e) {
+      return false;
+    }
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    localStorage.setItem("manual_admin", String(manualIsAdmin));
+    try {
+      localStorage.setItem("manual_admin", String(manualIsAdmin));
+    } catch (e) {
+      // Ignore
+    }
   }, [manualIsAdmin]);
 
   useEffect(() => {
