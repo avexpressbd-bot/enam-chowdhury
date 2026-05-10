@@ -86,6 +86,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       const docRef = doc(db, "settings", "global");
       
       const unsubscribe = onSnapshot(docRef, (snap) => {
+        setLoading(false); // Ensure loading is false as soon as we get a response
         if (snap.exists()) {
           console.log("Settings data received:", snap.id);
           const data = snap.data();

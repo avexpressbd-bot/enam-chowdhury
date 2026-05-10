@@ -200,13 +200,21 @@ export default function Admin() {
     }, 20000);
 
     try {
+      // Check payload size (rough estimate for Base64)
+      const payloadSize = JSON.stringify(formData).length;
+      if (payloadSize > 800000) { // 800KB roughly
+        throw new Error("Payload too large. Please use smaller images.");
+      }
+
       await updateSettings(formData);
       setStatus({ type: 'success', message: 'সেটিংস সফলভাবে সেভ হয়েছে!' });
     } catch (error: any) {
       console.error("Save error:", error);
       let msg = 'সেভ করতে সমস্যা হয়েছে।';
-      if (error.message?.includes('too large')) {
-        msg = 'ছবির সাইজ অনেক বড়! দয়া করে ছোট ছবি ব্যবহার করুন।';
+      if (error.message?.includes('smaller images') || error.message?.includes('too large')) {
+        msg = 'ছবির সাইজ অনেক বড়! দয়া করে ছোট সাইজের ছবি ব্যবহার করুন (১ মেগাবাইট এর কম)।';
+      } else if (error.message?.includes('permission-denied')) {
+        msg = 'পারমিশন নেই! Firebase Rules সঠিকভাবে সেটআপ করুন।';
       }
       setStatus({ type: 'error', message: msg });
     } finally {
