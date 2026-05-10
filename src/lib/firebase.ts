@@ -28,6 +28,12 @@ export const auth = app ? getAuth(app) : ({} as any);
 export const analytics = app && typeof window !== 'undefined' ? getAnalytics(app) : null;
 export const firebaseApp = app;
 
+if (typeof window !== 'undefined') {
+  (window as any).db = db;
+  (window as any).auth = auth;
+  (window as any).firebaseConfig = firebaseConfig;
+}
+
 export enum OperationType {
   CREATE = 'create',
   UPDATE = 'update',

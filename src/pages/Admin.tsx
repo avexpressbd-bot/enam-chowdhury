@@ -49,9 +49,38 @@ export default function Admin() {
         </div>
         <h1 className="text-2xl font-bold mb-4">অ্যাডমিন প্যানেল</h1>
         {user ? (
-          <div className="mb-8">
-            <p className="text-slate-600 mb-2">আপনি লগইন করেছেন: <span className="font-bold text-slate-900">{user.email}</span></p>
-            <p className="text-red-500 text-sm font-medium">কিন্তু আপনার এই ইমেইলটি অ্যাডমিন হিসেবে তালিকাভুক্ত নয়।</p>
+          <div className="mb-8 space-y-4">
+            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
+              <p className="text-sm text-slate-500 mb-1">লগইন করা ইমেইল:</p>
+              <p className="font-bold text-slate-900 break-all">{user.email || "No Email Found"}</p>
+            </div>
+            
+            <div className="p-4 bg-red-50 rounded-2xl border border-red-100">
+              <p className="text-red-600 text-sm font-bold flex items-center justify-center gap-2">
+                <AlertCircle size={16} /> অ্যাডমিন এক্সেস নেই
+              </p>
+              <p className="text-red-500 text-xs mt-1">আপনার এই ইমেইলটি অ্যাডমিন হিসেবে তালিকাভুক্ত নয়।</p>
+            </div>
+
+            <div className="bg-amber-50 p-4 rounded-xl border border-amber-100 text-amber-800 text-xs text-left">
+              <p className="font-bold mb-2 flex items-center gap-2">
+                <SettingsIcon size={14} /> কী করবেন?
+              </p>
+              <ul className="list-disc pl-4 space-y-1">
+                <li>নিশ্চিত করুন আপনি <strong>jummanbepari5@gmail.com</strong> দিয়ে লগইন করেছেন।</li>
+                <li>Firebase কনসোলে <strong>Firestore Database</strong> ইনাবল করা আছে কি না চেক করুন।</li>
+                <li>Firebase কনসোলে <strong>Authentication</strong>-এ Google Login এনাবেল আছে কি না চেক করুন।</li>
+              </ul>
+            </div>
+            
+            <div className="text-left text-[10px] text-slate-400 font-mono bg-slate-50 p-3 rounded-lg overflow-auto max-h-40 border border-slate-200">
+              <p className="text-slate-500 font-bold border-b pb-1 mb-1">Debug Status:</p>
+              <p>Email: {user.email || 'unset'}</p>
+              <p>Target: jummanbepari5@gmail.com</p>
+              <p>Match: {String(user.email?.toLowerCase().trim() === "jummanbepari5@gmail.com")}</p>
+              <p>IsAdmin State: {String(isAdmin)}</p>
+              <p>User UID: {user.uid}</p>
+            </div>
           </div>
         ) : (
           <p className="text-slate-600 mb-8">এই পৃষ্ঠাটি শুধুমাত্র অ্যাডমিনদের জন্য। অনুগ্রহ করে লগইন করুন।</p>

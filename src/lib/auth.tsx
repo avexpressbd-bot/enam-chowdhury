@@ -29,13 +29,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const unsubscribe = onAuthStateChanged(auth, async (user) => {
         setUser(user);
         if (user) {
+          const normalizedUserEmail = user.email?.toLowerCase().trim();
+          const targetAdminEmail = "jummanbepari5@gmail.com".toLowerCase().trim();
+          
+          console.log("Auth User detected:", normalizedUserEmail, "UID:", user.uid);
           try {
             const adminDoc = await getDoc(doc(db, "admins", user.uid));
-            const isUserAdmin = adminDoc?.exists() || user.email === "jummanbepari5@gmail.com";
+            const isUserAdmin = adminDoc?.exists() || normalizedUserEmail === targetAdminEmail;
+            
+            console.log("Admin Check Details:", { 
+              isUserAdmin, 
+              docExists: adminDoc?.exists(), 
+              emailMatch: normalizedUserEmail === targetAdminEmail,
+              userEmail: normalizedUserEmail,
+              targetEmail: targetAdminEmail
+            });
+            
             setIsAdmin(isUserAdmin);
           } catch (error) {
-            console.error("Admin check failed:", error);
-            setIsAdmin(user.email === "jummanbepari5@gmail.com");
+            console.error("Admin check failed (likely permissions or network):", error);
+            const isUserAdmin = normalizedUserEmail === targetAdminEmail;
+            console.log("Falling back to email-only admin check:", isUserAdmin);
+            setIsAdmin(isUserAdmin);
           }
         } else {
           setIsAdmin(false);
