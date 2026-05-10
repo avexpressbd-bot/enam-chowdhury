@@ -94,20 +94,21 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       clearTimeout(timer);
       if (snap.exists()) {
         const data = snap.data();
-        setSettings({
-          ...defaultSettings,
+        setSettings(prev => ({
+          ...prev,
           ...data,
           // Extra safety: ensure arrays are always arrays even if database has null/missing
-          breakingNews: Array.isArray(data.breakingNews) ? data.breakingNews : (settings.breakingNews || defaultSettings.breakingNews),
-          manifesto: Array.isArray(data.manifesto) ? data.manifesto : (settings.manifesto || defaultSettings.manifesto),
-          updates: Array.isArray(data.updates) ? data.updates : (settings.updates || defaultSettings.updates),
-          videos: Array.isArray(data.videos) ? data.videos : (settings.videos || defaultSettings.videos),
-        } as SiteSettings);
+          breakingNews: Array.isArray(data.breakingNews) ? data.breakingNews : prev.breakingNews,
+          manifesto: Array.isArray(data.manifesto) ? data.manifesto : prev.manifesto,
+          updates: Array.isArray(data.updates) ? data.updates : prev.updates,
+          videos: Array.isArray(data.videos) ? data.videos : prev.videos,
+        } as SiteSettings));
       }
       setLoading(false);
     }, (error) => {
       clearTimeout(timer);
-      console.error("Settings load error:", error);
+      console.error("Firestore Settings Error:", error.code, error.message);
+      // If permission-denied, we still want to stop loading and show defaults
       setLoading(false);
     });
 

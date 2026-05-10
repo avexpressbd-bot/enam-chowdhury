@@ -45,10 +45,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const unsubscribe = onAuthStateChanged(auth, async (user) => {
         clearTimeout(safetyTimer);
         setUser(user);
+        
         if (user) {
           const normalizedUserEmail = user.email?.toLowerCase().trim();
-          const targetAdminEmail = "jummanbepari5@gmail.com".toLowerCase().trim();
-          
           console.log("Auth User detected:", normalizedUserEmail);
           
           // Primary check: Email match (instant)
@@ -58,32 +57,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             return;
           }
 
-          // Force admin if it's the specific email even if normalize fails (rare)
-          if (user.email === "jummanbepari5@gmail.com") {
-             setIsAdmin(true);
-             setLoading(false);
-             return;
-          }
-
-          // Secondary check: Database check (if logic exists there)
+          // Secondary check: Database check
           try {
             const adminDoc = await getDoc(doc(db, "admins", user.uid));
-            if (adminDoc?.exists()) {
-              console.log("Admin match found in Database!");
-              setIsAdmin(true);
-            } else {
-              setIsAdmin(false);
-            }
+            setIsAdmin(adminDoc?.exists() || false);
           } catch (error) {
-            console.error("Database admin check skipped or failed:", error);
-            // If it's the correct email, we already caught it above, so we stay false if it failed here and email didn't match
+            console.error("Database admin check failed:", error);
             setIsAdmin(false);
           }
         } else {
           setIsAdmin(false);
         }
+        
         setLoading(false);
       }, (error) => {
+        clearTimeout(safetyTimer);
         console.error("Auth state change error:", error);
         setLoading(false);
       });
