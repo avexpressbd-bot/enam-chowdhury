@@ -66,20 +66,19 @@ export default function Admin() {
               <p className="font-bold mb-2 flex items-center gap-2">
                 <SettingsIcon size={14} /> কী করবেন?
               </p>
-              <ul className="list-disc pl-4 space-y-1">
+              <ol className="list-decimal pl-4 space-y-2">
+                <li>আপনার পাঠানো স্ক্রিনশটে যে নীল রঙের <strong>"Save"</strong> বাটন আছে সেটি ক্লিক করুন।</li>
+                <li>Firebase Console-এ <strong>Authentication {'->'} Settings {'->'} Authorized domains</strong>-এ গিয়ে আপনার অ্যাপের ডোমেইনটি (asia-east1.run.app) অ্যাড করুন।</li>
                 <li>নিশ্চিত করুন আপনি <strong>jummanbepari5@gmail.com</strong> দিয়ে লগইন করেছেন।</li>
-                <li>Firebase কনসোলে <strong>Firestore Database</strong> ইনাবল করা আছে কি না চেক করুন।</li>
-                <li>Firebase কনসোলে <strong>Authentication</strong>-এ Google Login এনাবেল আছে কি না চেক করুন।</li>
-              </ul>
+              </ol>
             </div>
             
             <div className="text-left text-[10px] text-slate-400 font-mono bg-slate-50 p-3 rounded-lg overflow-auto max-h-40 border border-slate-200">
               <p className="text-slate-500 font-bold border-b pb-1 mb-1">Debug Status:</p>
-              <p>Email: {user.email || 'unset'}</p>
-              <p>Target: jummanbepari5@gmail.com</p>
-              <p>Match: {String(user.email?.toLowerCase().trim() === "jummanbepari5@gmail.com")}</p>
-              <p>IsAdmin State: {String(isAdmin)}</p>
+              <p>Email: {user.email || "No Email Found"}</p>
               <p>User UID: {user.uid}</p>
+              <p>IsAdmin (App State): {String(isAdmin)}</p>
+              <p>Browser: {navigator.userAgent.substring(0, 50)}...</p>
             </div>
           </div>
         ) : (
