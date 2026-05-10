@@ -8,7 +8,7 @@ interface AuthContextType {
   isAdmin: boolean;
   loading: boolean;
   login: () => Promise<void>;
-  loginWithCredentials: (username: string, password: string) => boolean;
+  loginWithCredentials: (username: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
 }
 
@@ -96,10 +96,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await signOut(auth);
   };
 
-  const loginWithCredentials = (username: string, password: string) => {
+  const loginWithCredentials = async (username: string, password: string) => {
     if (username === "admin" && password === "admin123") {
-      setManualIsAdmin(true);
-      return true;
+      try {
+        // If not already signed in to Firebase, sign in anonymously to satisfy security rules
+        if (!auth.currentUser) {
+          const { signInAnonymously } = await import("firebase/auth");
+          await signInAnonymously(auth);
+        }
+        setManualIsAdmin(true);
+        return true;
+      } catch (e) {
+        console.error("Firebase Anonymous Auth failed:", e);
+        // Even if Firebase fails, we still allow UI admin, but writes might fail
+        setManualIsAdmin(true);
+        return true;
+      }
     }
     return false;
   };

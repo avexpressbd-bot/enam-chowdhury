@@ -85,9 +85,17 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     try {
       const docRef = doc(db, "settings", "global");
       
-      const unsubscribe = onSnapshot(docRef, (doc) => {
-        if (doc.exists()) {
-          setSettings(doc.data() as SiteSettings);
+      const unsubscribe = onSnapshot(docRef, (snap) => {
+        if (snap.exists()) {
+          console.log("Settings data received:", snap.id);
+          const data = snap.data();
+          setSettings({
+            ...defaultSettings,
+            ...data,
+            // Deep merge for arrays if needed, but simple merge for now
+          } as SiteSettings);
+        } else {
+          console.log("No settings document found, using defaults");
         }
         setLoading(false);
       }, (error) => {

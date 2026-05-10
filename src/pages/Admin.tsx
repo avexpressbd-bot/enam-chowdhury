@@ -151,8 +151,8 @@ export default function Admin() {
           )}
 
           <button 
-            onClick={() => {
-              const success = loginWithCredentials(username, password);
+            onClick={async () => {
+              const success = await loginWithCredentials(username, password);
               if (!success) {
                 setManualLoginError("ইউজারনেম বা পাসওয়ার্ড ভুল!");
               }
@@ -186,15 +186,31 @@ export default function Admin() {
   }
 
   const handleSave = async () => {
-    if (!formData) return;
+    if (!formData || isSaving) return;
+    
     setIsSaving(true);
     setStatus(null);
+
+    // Timeout to prevent infinite loading state
+    const timer = setTimeout(() => {
+      if (isSaving) {
+        setIsSaving(false);
+        setStatus({ type: 'error', message: 'সেভ করতে অনেক সময় লাগছে। ছবিগুলোর সাইজ অনেক বড় হতে পারে।' });
+      }
+    }, 20000);
+
     try {
       await updateSettings(formData);
       setStatus({ type: 'success', message: 'সেটিংস সফলভাবে সেভ হয়েছে!' });
-    } catch (error) {
-      setStatus({ type: 'error', message: 'সেভ করতে সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করুন।' });
+    } catch (error: any) {
+      console.error("Save error:", error);
+      let msg = 'সেভ করতে সমস্যা হয়েছে।';
+      if (error.message?.includes('too large')) {
+        msg = 'ছবির সাইজ অনেক বড়! দয়া করে ছোট ছবি ব্যবহার করুন।';
+      }
+      setStatus({ type: 'error', message: msg });
     } finally {
+      clearTimeout(timer);
       setIsSaving(false);
     }
   };
