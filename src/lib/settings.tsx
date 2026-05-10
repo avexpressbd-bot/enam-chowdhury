@@ -60,26 +60,30 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!isFirebaseConfigured) {
+    if (!isFirebaseConfigured || !db || typeof db.type !== 'string') {
+      console.warn("Firebase Firestore not initialized correctly");
       setLoading(false);
       return;
     }
-    const docRef = doc(db, "settings", "global");
-    
-    // The settings will use defaultSettings as initial state if the document doesn't exist
-    const unsubscribe = onSnapshot(docRef, (doc) => {
-      if (doc.exists()) {
-        setSettings(doc.data() as SiteSettings);
-      }
-      setLoading(false);
-    }, (error) => {
-      console.error("Settings load failed:", error);
-      // Don't throw here to avoid crashing the whole App before we can show something
-      // handleFirestoreError(error, OperationType.GET, "settings/global");
-      setLoading(false);
-    });
 
-    return () => unsubscribe();
+    try {
+      const docRef = doc(db, "settings", "global");
+      
+      const unsubscribe = onSnapshot(docRef, (doc) => {
+        if (doc.exists()) {
+          setSettings(doc.data() as SiteSettings);
+        }
+        setLoading(false);
+      }, (error) => {
+        console.error("Settings load failed:", error);
+        setLoading(false);
+      });
+
+      return () => unsubscribe();
+    } catch (error) {
+      console.error("Failed to setup settings snapshot:", error);
+      setLoading(false);
+    }
   }, []);
 
   const updateSettings = async (newSettings: SiteSettings) => {

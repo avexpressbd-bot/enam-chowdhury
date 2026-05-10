@@ -19,29 +19,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!isFirebaseConfigured) {
+    if (!isFirebaseConfigured || !auth || typeof auth.onAuthStateChanged !== 'function') {
+      console.warn("Firebase Auth not initialized correctly");
       setLoading(false);
       return;
     }
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setUser(user);
-      if (user) {
-        // Simple admin check: either email matches or document exists in admins collection
-        try {
-          const adminDoc = await getDoc(doc(db, "admins", user.uid));
-          const isUserAdmin = adminDoc.exists() || user.email === "jummanbepari5@gmail.com";
-          setIsAdmin(isUserAdmin);
-        } catch (error) {
-          console.error("Admin check failed:", error);
-          setIsAdmin(user.email === "jummanbepari5@gmail.com");
+    
+    try {
+      const unsubscribe = onAuthStateChanged(auth, async (user) => {
+        setUser(user);
+        if (user) {
+          try {
+            const adminDoc = await getDoc(doc(db, "admins", user.uid));
+            const isUserAdmin = adminDoc?.exists() || user.email === "jummanbepari5@gmail.com";
+            setIsAdmin(isUserAdmin);
+          } catch (error) {
+            console.error("Admin check failed:", error);
+            setIsAdmin(user.email === "jummanbepari5@gmail.com");
+          }
+        } else {
+          setIsAdmin(false);
         }
-      } else {
-        setIsAdmin(false);
-      }
-      setLoading(false);
-    });
+        setLoading(false);
+      }, (error) => {
+        console.error("Auth state change error:", error);
+        setLoading(false);
+      });
 
-    return () => unsubscribe();
+      return () => unsubscribe();
+    } catch (error) {
+      console.error("Failed to setup auth listener:", error);
+      setLoading(false);
+    }
   }, []);
 
   const login = async () => {

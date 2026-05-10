@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { getAnalytics } from 'firebase/analytics';
 
 // Simplified config loading for AI Studio environment
 // @ts-ignore
@@ -14,25 +15,17 @@ const firebaseConfig: any = {
   storageBucket: (import.meta as any).env?.VITE_FIREBASE_STORAGE_BUCKET || localConfig?.storageBucket,
   messagingSenderId: (import.meta as any).env?.VITE_FIREBASE_MESSAGING_SENDER_ID || localConfig?.messagingSenderId,
   appId: (import.meta as any).env?.VITE_FIREBASE_APP_ID || localConfig?.appId,
+  measurementId: (import.meta as any).env?.VITE_FIREBASE_MEASUREMENT_ID || localConfig?.measurementId,
   firestoreDatabaseId: (import.meta as any).env?.VITE_FIREBASE_DATABASE_ID || localConfig?.firestoreDatabaseId || "(default)"
 };
 
 // For now, let's just make sure we don't crash if things are missing
 export const isFirebaseConfigured = !!(firebaseConfig.apiKey && firebaseConfig.projectId);
 
-console.log("Firebase Provider Status:", { 
-  isConfigured: isFirebaseConfigured, 
-  projectId: firebaseConfig.projectId,
-  authDomain: firebaseConfig.authDomain
-});
-
-if (!isFirebaseConfigured) {
-  console.warn("Firebase is NOT configured properly. Check your environment variables or local config.");
-}
-
 const app = isFirebaseConfigured ? initializeApp(firebaseConfig) : null;
 export const db = app ? getFirestore(app, firebaseConfig.firestoreDatabaseId) : ({} as any);
 export const auth = app ? getAuth(app) : ({} as any);
+export const analytics = app && typeof window !== 'undefined' ? getAnalytics(app) : null;
 export const firebaseApp = app;
 
 export enum OperationType {

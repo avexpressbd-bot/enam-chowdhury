@@ -1,9 +1,10 @@
 {
-  "projectId": "enamchowdury-f4b68",
-  "appId": "1:738619663405:web:62c69402702f9c594d04a4",
-  "apiKey": "AIzaSyA4tbaCFAhFgfSspMAxAO0C48Ck5GzKXOM",
-  "authDomain": "enamchowdury-f4b68.firebaseapp.com",
+  "projectId": "enam-chowdhury",
+  "appId": "1:677929479067:web:78aa29b366344d34ac4f3e",
+  "apiKey": "AIzaSyAZjAOptZgTdvCiC9fCpFZHxxONxpzg0Gc",
+  "authDomain": "enam-chowdhury.firebaseapp.com",
   "firestoreDatabaseId": "(default)",
-  "storageBucket": "enamchowdury-f4b68.firebasestorage.app",
-  "messagingSenderId": "738619663405"
+  "storageBucket": "enam-chowdhury.firebasestorage.app",
+  "messagingSenderId": "677929479067",
+  "measurementId": "G-XL5N84B4H3"
 }
