@@ -88,7 +88,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     const timer = setTimeout(() => {
       console.warn("Settings loading timed out - using defaults");
       setLoading(false);
-    }, 5000);
+    }, 3500);
 
     const unsubscribe = onSnapshot(docRef, (snap) => {
       clearTimeout(timer);

@@ -37,28 +37,25 @@ function AppContent() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowTimeout(true);
-    }, 10000); // 10 seconds timeout
+    }, 5000); // 5 seconds timeout for support UI
     return () => clearTimeout(timer);
   }, []);
 
   if (authLoading || settingsLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50">
         <div className="flex flex-col items-center gap-6 p-8 text-center max-w-sm">
           <div className="relative">
-            <div className="w-16 h-16 border-4 border-red-100 border-t-red-600 rounded-full animate-spin"></div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-8 h-8 bg-red-50 rounded-full"></div>
-            </div>
+            <div className="w-16 h-16 border-4 border-slate-200 border-t-red-600 rounded-full animate-spin"></div>
           </div>
           <div className="space-y-4">
             <div className="space-y-1">
-              <h1 className="text-xl font-bold text-slate-800 tracking-tight">লোড করা হচ্ছে...</h1>
-              <p className="text-slate-500 text-sm">আপনার নির্বাচনী পোর্টাল প্রস্তুত হচ্ছে।</p>
+              <h1 className="text-xl font-black text-slate-900 tracking-tight">লোড হচ্ছে...</h1>
+              <p className="text-slate-500 text-sm font-medium">অনুগ্রহ করে অপেক্ষা করুন।</p>
             </div>
             
             <div className="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm text-center">
-              <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-2">স্ট্যাটাস চেক</p>
+              <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-2">সিস্টেম স্ট্যাটাস</p>
               <div className="flex justify-center gap-4 text-xs font-bold font-mono">
                 <span className={authLoading ? "text-amber-500 animate-pulse" : "text-emerald-600"}>
                   {authLoading ? "AUTH..." : "AUTH OK"}
@@ -78,15 +75,11 @@ function AppContent() {
               </div>
               
               <div className="space-y-4 opacity-90">
-                <p className="text-xs leading-relaxed">১. নিশ্চিত করুন আপনি <b>Cloud Firestore</b> (Realtime Database নয়) ব্যবহার করছেন।</p>
-                <div className="bg-slate-800 p-3 rounded-xl border border-slate-700 font-mono text-[10px] text-emerald-400">
-                  allow read, write: if true;
-                </div>
-                <p className="text-xs leading-relaxed">২. এটি <b>Publish</b> করা হয়েছে কিনা চেক করুন।</p>
+                <p className="text-xs leading-relaxed">সাইটটি লোড হেতে স্বাভাবিকের চেয়ে বেশি সময় নিচ্ছে। আপনার ইন্টারনেট কানেকশন চেক করুন।</p>
               </div>
 
               <button 
-                onClick={() => window.location.reload()}
+                onClick={() => window.location.href = window.location.origin}
                 className="w-full mt-6 bg-red-600 text-white px-4 py-3 rounded-xl font-bold text-xs hover:bg-red-700 transition-all flex items-center justify-center gap-2"
               >
                 আবার লোড করুন

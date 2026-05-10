@@ -12,6 +12,7 @@ export default function Admin() {
   const [formData, setFormData] = useState<SiteSettings | null>(null);
   const [status, setStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [activeTab, setActiveTab] = useState<'settings' | 'messages'>('settings');
   const [messages, setMessages] = useState<any[]>([]);
   
@@ -38,24 +39,70 @@ export default function Admin() {
     }
   }, [isAdmin]);
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, field: keyof SiteSettings | string, index?: number, subfield?: string) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: keyof SiteSettings | string, index?: number, subfield?: string) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    setIsUploading(true);
+
+    // Helper for compression
+    const compressImage = (base64Str: string): Promise<string> => {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.src = base64Str;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 1200;
+          const MAX_HEIGHT = 1200;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            // Use JPEG with 0.6 quality for aggressive compression while maintaining decent look
+            resolve(canvas.toDataURL('image/jpeg', 0.6));
+          } else {
+            resolve(base64Str);
+          }
+        };
+      });
+    };
+
     const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64String = reader.result as string;
-      if (!formData) return;
+    reader.onloadend = async () => {
+      const originalBase64 = reader.result as string;
+      const compressedBase64 = await compressImage(originalBase64);
+      
+      if (!formData) {
+        setIsUploading(false);
+        return;
+      }
 
       if (index !== undefined && subfield) {
         // Handle array updates like manifesto or updates
         const updatedArray = [...(formData[field as keyof SiteSettings] as any[])];
-        updatedArray[index] = { ...updatedArray[index], [subfield]: base64String };
+        updatedArray[index] = { ...updatedArray[index], [subfield]: compressedBase64 };
         setFormData({ ...formData, [field]: updatedArray });
       } else {
         // Handle top-level fields
-        setFormData({ ...formData, [field as keyof SiteSettings]: base64String });
+        setFormData({ ...formData, [field as keyof SiteSettings]: compressedBase64 });
       }
+      setIsUploading(false);
     };
     reader.readAsDataURL(file);
   };
@@ -83,14 +130,17 @@ export default function Admin() {
     <div>
       <label className="block text-xs font-black uppercase tracking-widest text-slate-500 mb-2">{label}</label>
       <div className="flex items-center gap-4">
-        <label className="flex-1 cursor-pointer group">
+        <label className={`flex-1 cursor-pointer group ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
           <div className="flex items-center gap-3 px-4 py-3 bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl group-hover:border-red-400 group-hover:bg-red-50 transition-all">
-            <Upload size={18} className="text-slate-400 group-hover:text-red-600" />
-            <span className="text-sm font-bold text-slate-500 group-hover:text-red-700">ছবি সিলেক্ট করুন</span>
+            <Upload size={18} className={`${isUploading ? 'animate-bounce' : 'text-slate-400 group-hover:text-red-600'}`} />
+            <span className="text-sm font-bold text-slate-500 group-hover:text-red-700">
+              {isUploading ? 'প্রসেস হচ্ছে...' : 'ছবি সিলেক্ট করুন'}
+            </span>
             <input 
               type="file" 
               className="hidden" 
               accept="image/*"
+              disabled={isUploading}
               onChange={(e) => handleFileUpload(e, field, index, subfield)}
             />
           </div>
@@ -202,8 +252,10 @@ export default function Admin() {
     try {
       // Check payload size (rough estimate for Base64)
       const payloadSize = JSON.stringify(formData).length;
-      if (payloadSize > 800000) { // 800KB roughly
-        throw new Error("Payload too large. Please use smaller images.");
+      console.log("Saving payload size:", payloadSize);
+      
+      if (payloadSize > 1000000) { // 1MB hard limit for Firestore document
+        throw new Error("Payload too large. Too many high-resolution images even after compression.");
       }
 
       await updateSettings(formData);
@@ -211,8 +263,8 @@ export default function Admin() {
     } catch (error: any) {
       console.error("Save error:", error);
       let msg = 'সেভ করতে সমস্যা হয়েছে।';
-      if (error.message?.includes('smaller images') || error.message?.includes('too large')) {
-        msg = 'ছবির সাইজ অনেক বড়! দয়া করে ছোট সাইজের ছবি ব্যবহার করুন (১ মেগাবাইট এর কম)। টিপস: ছবিগুলো অনলাইনে "Compress" করে আপলোড করুন।';
+      if (error.message?.includes('too large')) {
+        msg = 'সবগুলো ছবির মোট সাইজ অনেক বেশি হয়ে গেছে। দয়া করে কয়েকটা ছবি ডিলিট করুন অথবা আরও ছোট ছবি ব্যবহার করুন।';
       } else if (error.message?.includes('permission-denied')) {
         msg = 'পারমিশন নেই! Firebase-এ Cloud Firestore Rules সঠিকভাবে সেটআপ করুন (Realtime Database নয়)।';
       }

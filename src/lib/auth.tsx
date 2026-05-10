@@ -41,13 +41,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
     
-    // Safety timeout: stop loading if Firebase takes too long (e.g. 8 seconds)
+    // Safety timeout: stop loading if Firebase takes too long (e.g. 3.5 seconds)
     const safetyTimer = setTimeout(() => {
       if (loading) {
         console.warn("Auth status callback timed out - forcing app load");
         setLoading(false);
       }
-    }, 8000);
+    }, 3500);
 
     try {
       const unsubscribe = onAuthStateChanged(auth, async (user) => {
